@@ -4,7 +4,8 @@ import openai
 from ml_backend import *
 from scrapperutility import scrapperutility
 import pandas as pd
-st.sidebar.title("Hyperpersonalize Email Generator App")
+st.set_page_config (layout="wide")
+st.header("Hyperpersonalize Email Generator App")
 
 # st.markdown(""" 
 
@@ -33,6 +34,7 @@ metaDatadf = pd.DataFrame(
     }
 )
 
+linkedProfilesdf = pd.read_csv('data/linkedProfiles.csv')
 category = st.sidebar.radio("Choose email Outreach category", metaDatadf['category'].unique())
 intention = st.sidebar.selectbox("Intention", metaDatadf.where(metaDatadf['category'] == category)['Intention'].dropna().unique())
 #typeofemail = st.sidebar.selectbox("Type of email", options = ["Initial", "reply"])
@@ -59,14 +61,22 @@ with col1.form(key="form"):
     key_phrases = ""
     name_of_person = ""
     #with st.expander("Personalization Section : ") :
-    linkedinUrl = st.text_input("LinkedIn URL")
+    # linkedinUrl = st.text_input("LinkedIn URL")
+    linkedinUrl = st.selectbox("linkedIn URL", linkedProfilesdf['Profile'])
     top_key_phrase_cnt = st.slider("How many Key Phrases you want to extract? ", min_value=1, max_value=10)
     submit_button = st.form_submit_button(label='Generate Email', args = {})
 
     if submit_button:
         with st.spinner("Generating insights from linkedin profile"):
             if (str(linkedinUrl) != ""):
-                linkedin_extract = scrapper.linkedin_extractor(linkedinUrl, get_config('LINKEDIN_USERNAME'),get_config('LINKEDIN_PASSWORD'),get_config('CHROMEDRIVERPATH'))
+                # linkedin_extract = scrapper.linkedin_extractor(linkedinUrl, get_config('LINKEDIN_USERNAME'),get_config('LINKEDIN_PASSWORD'),get_config('CHROMEDRIVERPATH'))
+                #linkedin_extract = scrapper.linkedin_extractor(linkedinUrl)
+                linkedin_extract_filtereddf = linkedProfilesdf.where(linkedProfilesdf['Profile'] == linkedinUrl).dropna()
+                linkedin_extract = {
+                    'profile': str(linkedin_extract_filtereddf['About'].values)+ ", " + str( linkedin_extract_filtereddf['Experience'].values)+" ," + str(linkedin_extract_filtereddf['Skills'].values),
+                    'name' : str(linkedin_extract_filtereddf['Name'].values)
+                    }
+            
                 output_key_phrases = backend.get_key_phrase(linkedin_extract['profile'], top_cnt=top_key_phrase_cnt)
                 with col2.expander("Insights from LinkedIn Profile : "):
                     #col2.json(linkedin_extract)
