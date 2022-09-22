@@ -3,5 +3,3 @@ streamlit==1.8.0
 keybert
 keyphrase_vectorizers
 selenium
-bs4
-turtle
