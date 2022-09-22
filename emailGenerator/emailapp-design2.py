@@ -29,12 +29,12 @@ scrapper = scrapperutility()
 
 metaDatadf = pd.DataFrame(
     {
-        'category': ["Sales", "Recruitment", "Recruitment"],
-        'Intention' :["Product offering to a customer", "Initial email to candidate", "reply email to candidate"],
+        'category': ["Sales", "Recruitment", "Recruitment", "Customer Support"],
+        'Intention' :["Product offering to a customer", "Initial email to candidate", "reply email to candidate", "reply email to customer"],
     }
 )
 
-linkedProfilesdf = pd.read_csv(get_config('JSONPROFILEDATAPATH') +'/linkedProfiles.csv')
+linkedProfilesdf = pd.read_csv(get_config('JSONPROFILEDATAPATH') +'linkedProfiles.csv')
 category = st.sidebar.radio("Choose email Outreach category", metaDatadf['category'].unique())
 intention = st.sidebar.selectbox("Intention", metaDatadf.where(metaDatadf['category'] == category)['Intention'].dropna().unique())
 #typeofemail = st.sidebar.selectbox("Type of email", options = ["Initial", "reply"])
@@ -73,8 +73,8 @@ with col1.form(key="form"):
                 #linkedin_extract = scrapper.linkedin_extractor(linkedinUrl)
                 linkedin_extract_filtereddf = linkedProfilesdf.where(linkedProfilesdf['Profile'] == linkedinUrl).dropna()
                 linkedin_extract = {
-                    'profile': str(linkedin_extract_filtereddf['About'].values)+ ", " + str( linkedin_extract_filtereddf['Experience'].values)+" ," + str(linkedin_extract_filtereddf['Skills'].values),
-                    'name' : str(linkedin_extract_filtereddf['Name'].values)
+                    'profile': ' '.join(linkedin_extract_filtereddf['About'].values)+ ", " + ' '.join( linkedin_extract_filtereddf['Experience'].values)+" ," + ' '.join(linkedin_extract_filtereddf['Skills'].values),
+                    'name' : ''.join(linkedin_extract_filtereddf['Name'].values)
                     }
             
                 output_key_phrases = backend.get_key_phrase(linkedin_extract['profile'], top_cnt=top_key_phrase_cnt)
