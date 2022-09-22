@@ -34,7 +34,7 @@ metaDatadf = pd.DataFrame(
     }
 )
 
-linkedProfilesdf = pd.read_csv('data/linkedProfiles.csv')
+linkedProfilesdf = pd.read_csv('/data/linkedProfiles.csv')
 category = st.sidebar.radio("Choose email Outreach category", metaDatadf['category'].unique())
 intention = st.sidebar.selectbox("Intention", metaDatadf.where(metaDatadf['category'] == category)['Intention'].dropna().unique())
 #typeofemail = st.sidebar.selectbox("Type of email", options = ["Initial", "reply"])
