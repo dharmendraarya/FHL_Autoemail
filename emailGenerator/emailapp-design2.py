@@ -1,4 +1,6 @@
 #from turtle import back
+from email.policy import default
+from optparse import Option
 import streamlit as st
 import openai
 from ml_backend import *
@@ -30,17 +32,17 @@ scrapper = scrapperutility()
 metaDatadf = pd.DataFrame(
     {
         'category': ["Sales", "Recruitment", "Recruitment", "Customer Support"],
-        'Intention' :["Product offering to a customer", "Initial email to candidate", "reply email to candidate", "reply email to customer"],
+        'Intention' :["Product offering to a customer", "Initial email", "reply email", "reply email"],
     }
 )
 
 linkedProfilesdf = pd.read_csv(get_config('JSONPROFILEDATAPATH') +'linkedProfiles.csv')
-category = st.sidebar.radio("Choose email Outreach category", metaDatadf['category'].unique())
+category = st.sidebar.radio("Choose email Outreach category", metaDatadf['category'].unique(), index=1)
 intention = st.sidebar.selectbox("Intention", metaDatadf.where(metaDatadf['category'] == category)['Intention'].dropna().unique())
 #typeofemail = st.sidebar.selectbox("Type of email", options = ["Initial", "reply"])
 st.sidebar.markdown("_________")
 language = st.sidebar.selectbox("Choose language", options = ["English", "Arabic"])
-tone = st.sidebar.selectbox("Select tone", options = ["Funny", "Assertive", "Appreciative"])
+tone = st.sidebar.selectbox("Select tone", options = ["Assertive", "Appreciative","Funny"])
 if (category == "Sales") :
     #with st.expander("Product Detail : ") :
     st.sidebar.markdown("_________")
@@ -53,7 +55,10 @@ with col1.form(key="form"):
     prompt = st.text_input("Describe the Kind of Email you want to be written.")
     st.text(f"(Example: Data science opening at Contoso.com)")
 
-    start = st.text_input("Begin writing the first few or several words of your email:")
+    if ("reply email" in intention):
+        precedingemail = st.text_input("Paste the preceding email:")
+    else :
+        start = st.text_input("Begin writing the first few or several words of your email:")
 
     slider = st.slider("How many characters do you want your email to be? ", min_value=64, max_value=750)
     st.text("(A typical email is usually 100-500 characters)")
@@ -63,7 +68,11 @@ with col1.form(key="form"):
     #with st.expander("Personalization Section : ") :
     # linkedinUrl = st.text_input("LinkedIn URL")
     linkedinUrl = st.selectbox("linkedIn URL", linkedProfilesdf['Profile'])
-    top_key_phrase_cnt = st.slider("How many Key Phrases you want to extract? ", min_value=1, max_value=10)
+    top_key_phrase_cnt = st.slider("How many Key Phrases you want to extract? ", min_value=1, max_value=10, value=2)
+    with st.expander("Advance Settings :") :
+        creativity = st.slider("Choose to creatvitity Level? ", min_value=0.0, max_value=1.0, value=0.5)
+        emailVariants = st.selectbox("No of email variants", options= [1,2,3], index=2)
+
     submit_button = st.form_submit_button(label='Generate Email', args = {})
 
     if submit_button:
@@ -86,13 +95,20 @@ with col1.form(key="form"):
                     name_of_person = linkedin_extract['name'] #col2.text_area("Name :" , linkedin_extract['name'])
                     col2.table(pd.DataFrame({"name" : [name_of_person], "Key phrases" : [key_phrases]}))
                     
-        finalprompt = "write an email to " + name_of_person + " about " + category + " " + intention + " " +  prompt 
-        finalprompt = finalprompt + " \n\n and appreciate "  + key_phrases
-        finalprompt = finalprompt +  " \n\n " +  start 
+        finalprompt = "write a "+ category + " " + intention + " " + name_of_person 
+        if ("Initial email" in intention):
+            finalprompt =  finalprompt + " about " +  prompt  
+            if (key_phrases !=""):
+                finalprompt = finalprompt + "  and appreciate achievement in keyskills"  
+                finalprompt = finalprompt + " \n [[keyskills]]: " +  key_phrases
+        if ("response email" in intention):
+            finalprompt = finalprompt +  " \n\n " +   " and use guidance from keypoints to respond"
+            finalprompt = finalprompt + " \n [[preceding email]]: " +  precedingemail
+            finalprompt = finalprompt + " \n [[keypoints]]: " +  prompt
 
         with st.spinner("Generating Email using prompt..." ):
             st.write("#Prompt generated : - " + finalprompt)
-            output = backend.generate_email(finalprompt, slider)
+            output = backend.generate_email(finalprompt, slider,creativity,emailVariants)
             col2.markdown("____")
         col2.subheader("# Email Output:")
         #c1, c2, c3 = st.columns(3) #(["Tab 1","Tab 2", "Tab 3"])
@@ -106,5 +122,5 @@ with col1.form(key="form"):
         col2.write("You can press the Generate Email Button again if you're unhappy with the model's output")
         col2.subheader("Otherwise:")
         #st.text(output)
-        url = "https://mail.google.com/mail/?view=cm&fs=1&to=&su=&body=" + backend.replace_spaces_with_pluses(start + output[0])
+        url = "https://mail.google.com/mail/?view=cm&fs=1&to=&su=&body=" + backend.replace_spaces_with_pluses( output[0])
         col2.markdown("[Click me to send the email]({})".format(url))
