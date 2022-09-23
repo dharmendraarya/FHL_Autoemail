@@ -145,7 +145,7 @@ with col1.form(key="form"):
         #     finalprompt =  finalprompt + " about " +  prompt  
 
         finalprompt = prompt
-        if ("response email" in intention):
+        if ("reminder" in intention or "reply" in intention):
             # finalprompt = finalprompt +  " \n\n " +   " and use guidance from keypoints to respond"
             finalprompt =  f"{finalprompt}  \n [[preceding email]]: {precedingemail}" 
             # finalprompt = finalprompt + " \n [[keypoints]]: " +  prompt
