@@ -17,18 +17,18 @@ class ml_backend:
     
     openai.api_key = get_config('OPENAI_KEY')
     
-    def generate_email(self, userPrompt ="Write me a professionally sounding email", slider = "150"):
+    def generate_email(self, userPrompt ="Write me a professionally sounding email", slider = "150",creativity=0.5,emailVariants=2):
         """Returns a generated an email using GPT3 with a certain prompt and starting sentence"""
         response = openai.Completion.create(
             engine="davinci-instruct-beta",
             prompt=userPrompt, #+ "\n\n" + start,
-            temperature=0.5,
+            temperature=creativity,
             max_tokens=slider,
             top_p=1,
-            best_of=5,
+            best_of=emailVariants,
             frequency_penalty=0.0,
             presence_penalty=0.0,
-            n=3
+            n=emailVariants
         )
         return response.get("choices")#[0]['text']
 
