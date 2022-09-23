@@ -155,8 +155,11 @@ with col1.form(key="form"):
                 # finalprompt = finalprompt + " [[To]]: " + name_of_person 
                 finalprompt = f"{finalprompt}  [[To]]: : {name_of_person}"
             finalprompt = f"{finalprompt}   appreciate [[experience]]:  {key_phrases} "
-         
-
+        
+        if(productname != ""):
+            finalprompt = f"{finalprompt}   productName: {productname} "
+        if(productdescription != ""):
+            finalprompt = f"{finalprompt}   productdescription:  {productdescription} "
         
         #finalprompt = "write a "+ category + " " + " " + name_of_person
         # if ("Initial email" in intention):
