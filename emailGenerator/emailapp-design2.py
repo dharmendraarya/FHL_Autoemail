@@ -56,9 +56,9 @@ def modify_prompt():
             st.session_state.promptvalue =  f"write {tone} {intention} email"
     elif(category=="Sales"):
         if (intention == "Initial"):
-            st.session_state.promptvalue = f"write an {tone} {intention} email and from bullet points, companyName - [companyName] , [[bullet points:]] =[Offerings - high end analytics solution - Benefits - lower cost, improve profitability with the template implementations]" 
+            st.session_state.promptvalue = f"write an {tone} {intention} email and from bullet points, companyName - [companyName] , [[bullet points:]] =Offerings - {productname} - Benefits - {productdescription}" 
         elif (intention == "reply"):
-            st.session_state.promptvalue = f"write an {tone} {intention} email from preceding email and from  [[bullet points:]] =[Offerings - high end analytics solution - Benefits - lower cost, improve profitability with the template implementations]" 
+            st.session_state.promptvalue = f"write an {tone} {intention} email from preceding email and from  [[bullet points:]] =  Offerings - {productname} - Benefits - {productdescription}" 
         else :
             st.session_state.promptvalue =  f"write {tone} {intention} email"
     else:
@@ -78,7 +78,7 @@ tone = st.sidebar.selectbox("Select tone", options = ["Assertive", "Appreciative
 if (category == "Sales") :
     #with st.expander("Product Detail : ") :
     st.sidebar.markdown("_________")
-    productname = st.sidebar.text_input("Enter Product Name")
+    productname = st.sidebar.text_input("Enter Product Name", on_change= modify_prompt)
     productdescription = st.sidebar.text_input("Enter Product description")
 
 # prompt = st.text_area("Describe the Kind of email you want to be written.", value= "", height=100)
@@ -156,10 +156,10 @@ with col1.form(key="form"):
                 finalprompt = f"{finalprompt}  [[To]]: : {name_of_person}"
             finalprompt = f"{finalprompt}   appreciate [[experience]]:  {key_phrases} "
         
-        if(productname != ""):
-            finalprompt = f"{finalprompt}   productName: {productname} "
-        if(productdescription != ""):
-            finalprompt = f"{finalprompt}   productdescription:  {productdescription} "
+        # if(productname != ""):
+        #     finalprompt = f"{finalprompt}   productName: {productname} "
+        # if(productdescription != ""):
+        #     finalprompt = f"{finalprompt}   productdescription:  {productdescription} "
         
         #finalprompt = "write a "+ category + " " + " " + name_of_person
         # if ("Initial email" in intention):
