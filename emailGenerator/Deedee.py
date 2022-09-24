@@ -147,9 +147,9 @@ with col1.form(key="form"):
                         #col2.json(linkedin_extract)
                         #col2.table(pd.DataFrame({"name" : [linkedin_extract['name']], "profile" : [linkedin_extract['profile']]}))
                         key_phrases = output_key_phrases #col2.text_area("Key Archievements :" , value = output_key_phrases)
-                        col2.subheader("# Insights from Social Media:")
                         name_of_person = linkedin_extract['name'] #col2.text_area("Name :" , linkedin_extract['name'])
                         if is_debug :
+                            col2.subheader("# Insights from Social Media:")
                             col2.table(pd.DataFrame({"name" : [name_of_person], "Key phrases" : [key_phrases]}))
 
         #sample prompt # 1: Write an email to candidate about Data science opening at PinkiWriter   
