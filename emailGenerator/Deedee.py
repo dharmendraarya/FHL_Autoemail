@@ -35,7 +35,7 @@ scrapper = scrapperutility()
 metaDatadf = pd.DataFrame(
     {
         'category': ["Sales", "Sales", "Sales","Recruitment", "Recruitment","Recruitment", "Customer Support", "Others"],
-        'Intention' :["Trial offer", "Meeting request","reply", "Initial", "reminder", "reply", "asking customer to respond","Others"],
+        'Intention' :["Trial offer", "Meeting request","reply", "Initial", "reminder", "reply", "asking customer to respond","Any free text"],
     }
 )
 
@@ -138,19 +138,21 @@ with col1.form(key="form"):
                     #linkedin_extract = scrapper.linkedin_extractor(linkedinUrl)
                     linkedin_extract_filtereddf = linkedProfilesdf.where(linkedProfilesdf['Name'] == linkedinUrl).dropna()
                     linkedin_extract = {
-                        'profile': ' '.join(linkedin_extract_filtereddf['Title'].values)+ ", " +' '.join(linkedin_extract_filtereddf['About'].values)+ ", " + ' '.join( linkedin_extract_filtereddf['Experience'].values)+" ," + ' '.join(linkedin_extract_filtereddf['Skills'].values),
+                        'profile': 'Title:'+' '.join(linkedin_extract_filtereddf['Title'].values)+ ", About: " +' '.join(linkedin_extract_filtereddf['About'].values)+ ",Experience:" + ' '.join( linkedin_extract_filtereddf['Experience'].values)+" ,Skills:" + ' '.join(linkedin_extract_filtereddf['Skills'].values),
                         'name' : ''.join(linkedin_extract_filtereddf['Name'].values)
                         }
                 
                     output_key_phrases = backend.get_key_phrase(linkedin_extract['profile'], top_cnt=top_key_phrase_cnt)
-                    with col2.expander("Insights from LinkedIn Profile : "):
-                        #col2.json(linkedin_extract)
-                        #col2.table(pd.DataFrame({"name" : [linkedin_extract['name']], "profile" : [linkedin_extract['profile']]}))
-                        key_phrases = output_key_phrases #col2.text_area("Key Archievements :" , value = output_key_phrases)
-                        name_of_person = linkedin_extract['name'] #col2.text_area("Name :" , linkedin_extract['name'])
-                        if is_debug :
-                            col2.subheader("# Insights from Social Media:")
-                            col2.table(pd.DataFrame({"name" : [name_of_person], "Key phrases" : [key_phrases]}))
+                    
+                    #col2.json(linkedin_extract)
+                    #col2.table(pd.DataFrame({"name" : [linkedin_extract['name']], "profile" : [linkedin_extract['profile']]}))
+                    key_phrases = output_key_phrases #col2.text_area("Key Archievements :" , value = output_key_phrases)
+                    name_of_person = linkedin_extract['name'] #col2.text_area("Name :" , linkedin_extract['name'])
+                    #if is_debug :
+                    #with col1.expander("Insights from LinkedIn Profile : "):
+                    
+                    col1.write("###### Insights from Social Media:")
+                    col1.table(pd.DataFrame({"name" : [name_of_person], "from linkedIn" : [key_phrases]}))
 
         #sample prompt # 1: Write an email to candidate about Data science opening at PinkiWriter   
         # Write an email to candidate about Data science opening at PinkiWriter and appreciate leadership role at Torus insurance award of IT honor         
@@ -198,10 +200,10 @@ with col1.form(key="form"):
         col2.write("You can press the Generate Email Button again if you're unhappy with the model's output")
         for i, item in enumerate(output):
            j = i+1       
-           if (j>2):
-            col1.markdown("[Click to send the email - {}]({})".format(str(j),"https://mail.google.com/mail/?view=cm&fs=1&to=&su=&body=" + backend.replace_spaces_with_pluses(col1.text_area("Email-" + str(j),  item['text'].strip(), height =400))))
-           else:
-            col2.markdown("[Click to send the email - {}]({})".format(str(j),"https://mail.google.com/mail/?view=cm&fs=1&to=&su=&body=" + backend.replace_spaces_with_pluses(col2.text_area("Email - " + str(j),  item['text'].strip(), height =400))))
+        #    if (j>2):
+        #     col1.markdown("[Click to send the email - {}]({})".format(str(j),"https://mail.google.com/mail/?view=cm&fs=1&to=&su=&body=" + backend.replace_spaces_with_pluses(col1.text_area("Email-" + str(j),  item['text'].strip(), height =400))))
+        #    else:
+           col2.markdown("[Click to send the email - {}]({})".format(str(j),"https://mail.google.com/mail/?view=cm&fs=1&to=&su=&body=" + backend.replace_spaces_with_pluses(col2.text_area("Email - " + str(j),  item['text'].strip(), height =400))))
            
            #send_button = col2.form(key=str(i)).form_submit_button(label='Generate Email', args = {})
         
