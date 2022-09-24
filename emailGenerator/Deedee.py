@@ -51,7 +51,7 @@ def modify_prompt():
         if (intention == "Initial"):
             st.session_state.promptvalue = f"write {tone} email to {{candidate}} about {{role}} opening at {{contoso.com}} " 
         elif(intention == "reminder"):
-            st.session_state.promptvalue = f"write  {tone} {intention} email to {{candidate}} to respond on preceding email " 
+            st.session_state.promptvalue = f"write  {tone} {intention} email to {{candidate}} asking to respond on preceding email " 
             st.session_state.precedingemail = f"Hello candidate, We are excited to let you know that we have a {{position}} open at {{contoso.com}}. This is a great opportunity for someone with your skills and background. The position will involve working with large data sets to find trends and insights that can help improve our products and services. If you are interested in this position, please send your resume to {{email address}}. Thank you for your time and we look forward to hearing from you. "
         elif(intention == "reply"):
             st.session_state.promptvalue = f"write  {tone} {intention} email to {{candidate}} on preceding email and use guidance from keypoints to respond.\n {{keypoints}} = role description , meeting calendar link " 
@@ -60,9 +60,9 @@ def modify_prompt():
             st.session_state.promptvalue =  f"write {tone} {intention} email"
     elif(category=="Sales"):
         if (intention == "Trial offer"):
-            st.session_state.promptvalue = f"write {tone} {category} email from {{companyName}} about product [{productname}] and its benefits [{productdescription}]. 30 day trial" 
+            st.session_state.promptvalue = f"write {tone} {category} email from {{company}} about product [{productname}] and its benefits [{productdescription}]. 30 day trial" 
         elif (intention == "Meeting request"):
-            st.session_state.promptvalue = f"write {intention} email with {tone} tone to {{customer}} from {{companyName}} about product [{productname}] and its benefits [{productdescription}]. Great to see your experience in {{keyskills}}" 
+            st.session_state.promptvalue = f"write {intention} email with {tone} tone to {{customer}} from {{company}} about product [{productname}] and its benefits [{productdescription}]. Great to see your experience in {{keyskills}}" 
         elif (intention == "reply"):
             st.session_state.promptvalue = f"write {tone} {intention} email from {{preceding email}} about product [{productname}] and its benefits [{productdescription}]" 
             st.session_state.precedingemail = f"Hi {{companyName}}, I am interested in this product. However, I am not sure. Thank you  {{candidate Name}}"     
@@ -70,7 +70,7 @@ def modify_prompt():
             st.session_state.promptvalue =  f"write {tone} {intention} email"
     elif(category=="Customer Support"):
         if (intention == "asking customer to respond"):
-            st.session_state.promptvalue = f"write {tone} {intention} email to {{Customer}} asking to respond on preceding email" 
+            st.session_state.promptvalue = f"write {tone} email {intention} on preceding email" 
             #st.session_state.precedingemail = f"Greetings from Azure!Thank you for contacting Microsoft support. My name is {{support executive}}, and I am the Support Engineer who will be working with you on this Service Request. You may reach me using the contact information listed below, referencing the SR number #0000000.I understand that you need assistance with Quota request for Compute VM for DSv1 Series (XIO) to limit 21 in US West 2 (WUS2) region on your subscription id: 00-0000-0000-0000.As per your request I have engaged our capacity management team to review the request. And here is an update from our team:Requested prev generation sku is not available in requested region. Attaching the link Azure Products by Region | Microsoft Azure for your reference to check the available sku's in requested region.I can see your preferred contact method is phone, since it is not Business hour in your location, I have sent above email with the information on your requests.To assist you better, please let us know whether you comfortable with further communication on email. Or you require phone call.Awaiting your response. regards - {{support executive}}"
     else:
         st.session_state.promptvalue =  f"write {tone} email to {{person}} about {{appraisal discussion}}"
@@ -111,7 +111,7 @@ with col1.form(key="form"):
     if ("reply" in intention or 'reminder' in intention):
         precedingemail = st.text_area("Previous email:", value=st.session_state.precedingemail , height =150)
 
-    slider = st.slider("How many characters do you want your email to be? ", min_value=64, max_value=750, value = 140)
+    slider = st.slider("How many characters do you want your email to be? ", min_value=64, max_value=750, value = 450)
     # st.text("(A typical email is usually 100-500 characters)")
     
     key_phrases = ""
@@ -120,7 +120,7 @@ with col1.form(key="form"):
     IsLinkedFeed = st.sidebar.radio("Do you want to personalize your email with Insights from social feeds?", options = ["Yes", "No"], index=1) 
     if (IsLinkedFeed == "Yes"):
         with st.sidebar.expander("Personalization Section: ", expanded = True) :
-            linkedinUrl = st.selectbox("linkedIn URL", linkedProfilesdf['Profile'], index=0, help = "its restricted to selected profile only, until background job is sorted to get the scrapped Data for any linkedIn profile")
+            linkedinUrl = st.selectbox("linkedIn URL", linkedProfilesdf['Name'], index=0, help = "its restricted to selected profile only, until background job is sorted to get the scrapped Data for any linkedIn profile")
             top_key_phrase_cnt = st.slider("How many Key phrases you want to extract from linkedIn profile? ", min_value=1, max_value=10, value=2)
 
     with st.sidebar.expander("Advance Settings :") :
@@ -136,9 +136,9 @@ with col1.form(key="form"):
                 if (str(linkedinUrl) != "Select" ):
                     # linkedin_extract = scrapper.linkedin_extractor(linkedinUrl, get_config('LINKEDIN_USERNAME'),get_config('LINKEDIN_PASSWORD'),get_config('CHROMEDRIVERPATH'))
                     #linkedin_extract = scrapper.linkedin_extractor(linkedinUrl)
-                    linkedin_extract_filtereddf = linkedProfilesdf.where(linkedProfilesdf['Profile'] == linkedinUrl).dropna()
+                    linkedin_extract_filtereddf = linkedProfilesdf.where(linkedProfilesdf['Name'] == linkedinUrl).dropna()
                     linkedin_extract = {
-                        'profile': ' '.join(linkedin_extract_filtereddf['About'].values)+ ", " + ' '.join( linkedin_extract_filtereddf['Experience'].values)+" ," + ' '.join(linkedin_extract_filtereddf['Skills'].values),
+                        'profile': ' '.join(linkedin_extract_filtereddf['Title'].values)+ ", " +' '.join(linkedin_extract_filtereddf['About'].values)+ ", " + ' '.join( linkedin_extract_filtereddf['Experience'].values)+" ," + ' '.join(linkedin_extract_filtereddf['Skills'].values),
                         'name' : ''.join(linkedin_extract_filtereddf['Name'].values)
                         }
                 
@@ -166,8 +166,11 @@ with col1.form(key="form"):
         if (IsLinkedFeed == "Yes" and key_phrases !=""):
             if (name_of_person != ""):
                 finalprompt = f"{finalprompt} \n {{To}} : {name_of_person}"
-            finalprompt = f"{finalprompt} \n {{Expertize on}} :{key_phrases} "
-        
+            if (category=="Recruitment" and intention != "reminder"):
+                finalprompt = f"{finalprompt} \n Highlight {{expertize on}} :{key_phrases} "
+            else :
+                finalprompt = f"{finalprompt} \n {{keyskills}} :{key_phrases} "
+
         # if(productname != ""):
         #     finalprompt = f"{finalprompt}   productName: {productname} "
         # if(productdescription != ""):
